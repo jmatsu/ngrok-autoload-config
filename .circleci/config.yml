@@ -1,0 +1,32 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: debian:stretch
+    steps:
+      - checkout
+      - run:
+          name: "Install direnv"
+          command: |
+            arch=
+            case "$(uname -m)" in
+              arm64|armv6)
+                arch="arm"
+                ;;
+              i386)
+                arch="386"
+                ;;
+              x86_64)
+                arch="amd64"
+                ;;
+              *)
+                echo "unknown arch"
+                exit 1
+            esac
+            curl -sSL -o direnv "https://github.com/direnv/direnv/releases/download/v2.19.2/direnv.linux-$arch"
+            chmod +x direnv
+            echo "export PATH=$PWD:$PATH" >> "$BASH_ENV"
+            echo 'eval "$(direnv hook bash)"' >> "$BASH_ENV"
+            echo 'direnv allow' >> "$BASH_ENV"
+      - run: git submodule init
+      - run: run_test.bash
