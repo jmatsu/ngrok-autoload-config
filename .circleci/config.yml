@@ -23,15 +23,18 @@ workflows:
   version: 2
   feature_branch:
     jobs:
-      - test
-      - lint
-    filters:
-      branches:
-        ignore: /master/
+      - test:
+          filters:
+            branches:
+              ignore: /master/
+      - lint:
+          filters:
+            branches:
+              ignore: /master/
   on_master:
     jobs:
-      - test
-    filters:
-      branches:
-        only: /master/
+      - test:
+          filters:
+            branches:
+              only: /master/
 
