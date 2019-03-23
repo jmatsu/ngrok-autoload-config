@@ -22,7 +22,7 @@ die() {
 }
 
 get_config_opts() {
-  local config_dir= config_path=
+  local config_dir='' config_path=''
 
   for config_dir in "$@"; do
     config_path="${config_dir}/ngrok.yml"
@@ -46,12 +46,26 @@ should_load_configs() {
   esac
 }
 
-original_subcommands() {
+exec_ngrok_with_configurations() {
+  local -r subcommand="$1"
+  shift 1
+  local options=()
+  IFS=" " read -r -a options <<< "$(subcommand::configs-oneline)"
+  command ngrok "$subcommand" "${options[@]}" "$@"
+}
+
+is_original_subcommand() {
   declare -F "subcommand::$1" >/dev/null 2>&1
 }
 
 subcommand::configs() {
-  get_config_opts $CONFIG_DIRS
+  local options=()
+  IFS=" " read -r -a options <<< "$(echo "$CONFIG_DIRS")"
+  get_config_opts "${options[@]}"
+}
+
+subcommand::configs-oneline() {
+  subcommand::configs | xargs
 }
 
 subcommand::update-autoload() {
@@ -82,14 +96,14 @@ fi
 
 SUBCOMMAND="${1:-help}"
 
-if let "$# > 0"; then
+if (($# > 0)); then
   shift 1
 fi
 
-if original_subcommands "$SUBCOMMAND"; then
-  subcommand::$SUBCOMMAND "$@"
+if is_original_subcommand "$SUBCOMMAND"; then
+  "subcommand::$SUBCOMMAND" "$@"
 elif [[ "${IGNORE_CONFIG:=false}" != "true" ]] && should_load_configs "$SUBCOMMAND"; then
-  command ngrok "$SUBCOMMAND" $(get_config_opts $CONFIG_DIRS | xargs) "$@"
+  exec_ngrok_with_configurations "$SUBCOMMAND" "$@"
 else
   command ngrok "$SUBCOMMAND" "$@"
 fi
