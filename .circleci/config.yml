@@ -1,6 +1,6 @@
 version: 2
 jobs:
-  lint:
+  test:
     docker:
       - image: circleci/golang:1.10.3
     steps:
@@ -10,7 +10,7 @@ jobs:
           command: echo "export PATH="$PWD:$PWD/bin:$PWD/test/bin:$PWD/test/lib/bats/bin:$PATH"" >> "$BASH_ENV"
       - run: git submodule init
       - run: run_test.bash
-  test:
+  lint:
     docker:
       - image: koalaman/shellcheck-alpine
         entrypoint: ''
