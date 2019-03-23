@@ -9,7 +9,7 @@ jobs:
           name: "Extend PATH"
           command: |
             echo "export BATS_ROOT=$PWD/test/lib/bats" >> "$BASH_ENV"
-            echo "export \"PATH=$PWD:$PWD/bin:$PATH\"" >> "$BASH_ENV"
+            echo "export \"PATH=$PWD:$PWD/bin:$PWD/test/lib/bats/libexec/bats-core:$PATH\"" >> "$BASH_ENV"
       - run: git submodule init && git submodule update
       - run: exec_all_bats.bash
   lint:
