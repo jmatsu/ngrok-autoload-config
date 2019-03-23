@@ -21,6 +21,14 @@ die() {
   exit 1
 }
 
+reverse() {
+  if type tac >/dev/null 2>&1; then
+    cat - | tac
+  else
+    cat - | tail -r
+  fi
+}
+
 get_my_path() {
   local src="${BASH_SOURCE[0]}" temp_dir=''
   while [[ -h "$src" ]]; do
@@ -37,7 +45,7 @@ get_my_path() {
 get_config_opts() {
   local config_dir='' config_path=''
   local locations=()
-  IFS=" " read -r -a options <<< "$(ancestors | tail -r | xargs)"
+  IFS=" " read -r -a options <<< "$(ancestors | reverse | xargs)"
 
   for config_dir in "${options[@]}"; do
     config_path="${config_dir}/ngrok.yml"

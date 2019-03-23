@@ -2,12 +2,12 @@ version: 2
 jobs:
   lint:
     docker:
-      - image: bats/bats:latest
+      - image: circleci/golang:1.10.3
     steps:
       - checkout
       - run:
           name: "Extend PATH"
-          command: echo "export PATH="$PWD:$PWD/bin:$PWD/test/bin:$PATH"" >> "$BASH_ENV"
+          command: echo "export PATH="$PWD:$PWD/bin:$PWD/test/bin:$PWD/test/lib/bats/bin:$PATH"" >> "$BASH_ENV"
       - run: git submodule init
       - run: run_test.bash
   test:
