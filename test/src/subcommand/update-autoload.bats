@@ -3,7 +3,7 @@
 load '../common'
 source "src/hooks"
 
-@test "Should show a global configuration and the current wd configuration" {
+@test "Should run a command sequence of git" {
     run ngrok-autoload-config update-autoload
     cat<<EOF | assert_output -
 fetch
@@ -14,5 +14,4 @@ merge
 origin/release
 Completed update-autoload successfully.
 EOF
-    assert_line -- "--config $HOME/.ngrok2/ngrok.yml --config $WORKING_DIRECTORY_ROOT/a/ngrok.yml --config $WORKING_DIRECTORY_ROOT/a/b/c/d/ngrok.yml"
 }
