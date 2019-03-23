@@ -21,6 +21,19 @@ die() {
   exit 1
 }
 
+get_my_path() {
+  local src="${BASH_SOURCE[0]}" temp_dir=''
+  while [[ -h "$SOURCE" ]]; do
+    temp_dir="$(cd -P "$(dirname $src)" && pwd)"
+    src="$(readlink "$src")"
+
+    if [[ ! "$src" =~ ^/.* ]]; then
+      src="$temp_dir/$src"
+    fi
+  done
+  cd -P "$(dirname $src)" && pwd
+}
+
 get_config_opts() {
   local config_dir='' config_path=''
 
@@ -73,7 +86,7 @@ subcommand::update-autoload() {
     die "update-autoload cannot be run unless git exists"
   fi
 
-  cd "$(dirname "${BASH_SOURCE[0]}")"
+  cd "$(dirname $(get_my_path))"
 
   if [[ ! -d ".git" ]]; then
     die "update-autoload can be run only when installed through git clone"
