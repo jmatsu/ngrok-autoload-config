@@ -1,0 +1,81 @@
+#!/usr/bin/env bash
+
+set -eu
+set -o pipefail
+
+if [[ "${NGROK_AUTOLOAD_CONFIG_DEBUG:-false}" == "true" ]]; then
+  set -x
+fi
+
+err() {
+  echo "$*" >&2
+}
+
+die() {
+  local line=
+
+  for line in "$@"; do
+    err "$line"
+  done
+
+  exit 1
+}
+
+get_config_opts() {
+  local config_dir= config_path=
+
+  for config_dir in "$@"; do
+    config_path="${config_dir}/ngrok.yml"
+
+    if [[ -f "$config_path" ]]; then
+      echo "--config $config_path"
+    fi
+  done
+}
+
+should_load_configs() {
+  local -r subcommand="$1"
+
+  case "$subcommand" in
+    authtoken|credits|update|version|help|-h)
+      return 1
+      ;;
+    *)
+      return 0
+      ;;
+  esac
+}
+
+original_subcommands() {
+  declare -F "subcommand::$1" >/dev/null 2>&1
+}
+
+subcommand::configs() {
+  get_config_opts $CONFIG_DIRS
+}
+
+if ! type "ngrok" >/dev/null 2>&1; then
+  die "ngrok is not found" "please follow https://dashboard.ngrok.com/get-started to install"
+fi
+
+if [[ "$(basename $0)" == "ngrok-autoload-config" ]]; then
+  err "Recommend you add 'alias ngrok=$(which $0)' to your $(basename $SHELL)rc"
+fi
+
+: "${CONFIG_DIRS:=$PWD}"
+
+if [[ "${USE_GLOBAL_CONFIG:=true}" != "false" ]]; then
+  CONFIG_DIRS="$HOME/.ngrok2 $CONFIG_DIRS"
+fi
+
+SUBCOMMAND="${1:-help}"
+
+if original_subcommands "$SUBCOMMAND"; then
+  shift 1
+  subcommand::$SUBCOMMAND "$@"
+elif [[ "${IGNORE_CONFIG:=false}" != "true" ]] && should_load_configs "$SUBCOMMAND"; then
+  shift 1
+  command ngrok "$SUBCOMMAND" $(get_config_opts $CONFIG_DIRS | xargs) "$@"
+else
+  command ngrok "$@"
+fi
