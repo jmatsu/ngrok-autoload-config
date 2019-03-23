@@ -54,12 +54,24 @@ subcommand::configs() {
   get_config_opts $CONFIG_DIRS
 }
 
+subcommand::update-autoload() {
+  if ! type git >/dev/null 2>&1; then
+    die "update-autoload cannot be run unless git exists"
+  fi
+
+  cd "$(dirname "${BASH_SOURCE[0]}")"
+
+  if [[ ! -d ".git" ]]; then
+    die "update-autoload can be run only when installed through git clone"
+  fi
+
+  git fetch origin release
+  git merge --ff origin/release
+  echo "Completed update-autoload successfully."
+}
+
 if ! type "ngrok" >/dev/null 2>&1; then
   die "ngrok is not found" "please follow https://dashboard.ngrok.com/get-started to install"
-fi
-
-if [[ -n "${PS1:-}" ]] && [[ "$(basename $0)" == "ngrok-autoload-config" ]]; then
-  err "Recommend you add 'alias ngrok=$(which $0)' to your $(basename $SHELL)rc"
 fi
 
 : "${CONFIG_DIRS:=$PWD}"
@@ -70,12 +82,14 @@ fi
 
 SUBCOMMAND="${1:-help}"
 
-if original_subcommands "$SUBCOMMAND"; then
+if let "$# > 0"; then
   shift 1
+fi
+
+if original_subcommands "$SUBCOMMAND"; then
   subcommand::$SUBCOMMAND "$@"
 elif [[ "${IGNORE_CONFIG:=false}" != "true" ]] && should_load_configs "$SUBCOMMAND"; then
-  shift 1
   command ngrok "$SUBCOMMAND" $(get_config_opts $CONFIG_DIRS | xargs) "$@"
 else
-  command ngrok "$@"
+  command ngrok "$SUBCOMMAND" "$@"
 fi
