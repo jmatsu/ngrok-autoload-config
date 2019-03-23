@@ -74,7 +74,7 @@ exec_ngrok_with_configurations() {
   shift 1
   local options=()
   IFS=" " read -r -a options <<< "$(subcommand::configs-oneline)"
-  command ngrok "$subcommand" "${options[@]}" "$@"
+  exec command ngrok "$subcommand" "${options[@]}" "$@"
 }
 
 is_original_subcommand() {
@@ -137,5 +137,5 @@ if is_original_subcommand "$SUBCOMMAND"; then
 elif [[ "${IGNORE_CONFIG:=false}" != "true" ]] && should_load_configs "$SUBCOMMAND"; then
   exec_ngrok_with_configurations "$SUBCOMMAND" "$@"
 else
-  command ngrok "$SUBCOMMAND" "$@"
+  exec command ngrok "$SUBCOMMAND" "$@"
 fi
