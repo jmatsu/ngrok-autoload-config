@@ -1,0 +1,18 @@
+export WORKING_DIRECTORY_ROOT=$(mktemp -d)
+export WORKING_DIRECTORY="$WORKING_DIRECTORY_ROOT/a/b/c/d"
+export HOME="$WORKING_DIRECTORY_ROOT/home"
+
+setup() {
+  mkdir -p "$WORKING_DIRECTORY" "$HOME/.ngrok2"
+
+  touch "$WORKING_DIRECTORY_ROOT/a/ngrok.yml" "$WORKING_DIRECTORY_ROOT/a/b/c/d/ngrok.yml" "$HOME/.ngrok2/ngrok.yml"
+
+  cd "$WORKING_DIRECTORY"
+}
+
+teardown() {
+  cd "$TEST_ROOT"
+
+  echo "Clean up $WORKING_DIRECTORY_ROOT"
+  rm -rf "$WORKING_DIRECTORY_ROOT"
+}

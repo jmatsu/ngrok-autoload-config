@@ -23,7 +23,7 @@ die() {
 
 get_my_path() {
   local src="${BASH_SOURCE[0]}" temp_dir=''
-  while [[ -h "$SOURCE" ]]; do
+  while [[ -h "$src" ]]; do
     temp_dir="$(cd -P "$(dirname $src)" && pwd)"
     src="$(readlink "$src")"
 
@@ -36,8 +36,10 @@ get_my_path() {
 
 get_config_opts() {
   local config_dir='' config_path=''
+  local locations=()
+  IFS=" " read -r -a options <<< "$(ancestors | tail -r | xargs)"
 
-  for config_dir in "$@"; do
+  for config_dir in "${options[@]}"; do
     config_path="${config_dir}/ngrok.yml"
 
     if [[ -f "$config_path" ]]; then
@@ -71,10 +73,25 @@ is_original_subcommand() {
   declare -F "subcommand::$1" >/dev/null 2>&1
 }
 
+ancestors() {
+  local dir="$(pwd)"
+
+  while true; do
+    if [[ "$dir" == "$HOME" ]] || [[ "$dir" == "/" ]]; then
+      break
+    fi
+
+    echo "$dir"
+    dir="$(cd $dir && cd ../ && pwd)"
+  done
+
+  if [[ "${USE_GLOBAL_CONFIG:=true}" != "false" ]]; then
+    echo "$HOME/.ngrok2"
+  fi
+}
+
 subcommand::configs() {
-  local options=()
-  IFS=" " read -r -a options <<< "$(echo "$CONFIG_DIRS")"
-  get_config_opts "${options[@]}"
+  get_config_opts
 }
 
 subcommand::configs-oneline() {
@@ -86,7 +103,7 @@ subcommand::update-autoload() {
     die "update-autoload cannot be run unless git exists"
   fi
 
-  cd "$(dirname $(get_my_path))"
+  cd "$(get_my_path)"
 
   if [[ ! -d ".git" ]]; then
     die "update-autoload can be run only when installed through git clone"
@@ -99,12 +116,6 @@ subcommand::update-autoload() {
 
 if ! type "ngrok" >/dev/null 2>&1; then
   die "ngrok is not found" "please follow https://dashboard.ngrok.com/get-started to install"
-fi
-
-: "${CONFIG_DIRS:=$PWD}"
-
-if [[ "${USE_GLOBAL_CONFIG:=true}" != "false" ]]; then
-  CONFIG_DIRS="$HOME/.ngrok2 $CONFIG_DIRS"
 fi
 
 SUBCOMMAND="${1:-help}"

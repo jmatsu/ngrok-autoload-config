@@ -1,7 +1,7 @@
 #!/usr/bin/env bats
 
-load '../lib/bats-support/load'
-load '../lib/bats-assert/load'
+load './common'
+source "src/hooks"
 
 @test "Should not inject configs if authtoken" {
     run ngrok-autoload-config authtoken "token"
@@ -74,9 +74,11 @@ load '../lib/bats-assert/load'
     assert_success
     assert_line --index 0 -- "http"
     assert_line --index 1 -- "--config"
-    assert_line --index 2 --regexp '.*/ngrok.yml'
+    assert_line --index 2 -- "$HOME/.ngrok2/ngrok.yml"
     assert_line --index 3 -- "--config"
-    assert_line --index 4 --regexp '.*/ngrok.yml'
-    assert_line --index 5 -- "8000"
-    assert_line --index 6 -- "demo"
+    assert_line --index 4 -- "$WORKING_DIRECTORY_ROOT/a/ngrok.yml"
+    assert_line --index 5 -- "--config"
+    assert_line --index 6 -- "$WORKING_DIRECTORY_ROOT/a/b/c/d/ngrok.yml"
+    assert_line --index 7 -- "8000"
+    assert_line --index 8 -- "demo"
 }
