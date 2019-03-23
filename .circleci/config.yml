@@ -7,7 +7,7 @@ jobs:
       - checkout
       - run:
           name: "Extend PATH"
-          command: echo "export PATH="$PWD:$PWD/bin:$PWD/test/bin:$PWD/test/lib/bats/bin:$PATH"" >> "$BASH_ENV"
+          command: echo "export \"PATH=$PWD:$PWD/bin:$PATH\"" >> "$BASH_ENV"
       - run: git submodule init && git submodule update
       - run: run_test.bash
   lint:
