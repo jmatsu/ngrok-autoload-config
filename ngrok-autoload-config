@@ -58,7 +58,7 @@ if ! type "ngrok" >/dev/null 2>&1; then
   die "ngrok is not found" "please follow https://dashboard.ngrok.com/get-started to install"
 fi
 
-if [[ "$(basename $0)" == "ngrok-autoload-config" ]]; then
+if [[ -n "${PS1:-}" ]] && [[ "$(basename $0)" == "ngrok-autoload-config" ]]; then
   err "Recommend you add 'alias ngrok=$(which $0)' to your $(basename $SHELL)rc"
 fi
 

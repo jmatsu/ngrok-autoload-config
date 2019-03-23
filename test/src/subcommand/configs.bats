@@ -1,7 +1,7 @@
 #!/usr/bin/env bats
 
-load '../lib/bats-support/load'
-load '../lib/bats-assert/load'
+load '../../lib/bats-support/load'
+load '../../lib/bats-assert/load'
 
 @test "Should show a global configuration and the current wd configuration" {
     run ngrok-autoload-config configs
