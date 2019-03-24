@@ -23,7 +23,9 @@ Lower settings override the upper settings. So the strongest configuration is of
 
 NOTE: `ngrok-autoload-config` won't load `~/ngrok.yml` because it's the same to a global configuration.
 
-## Installation
+See [ngrok#config](https://ngrok.com/docs#config) to define configurations.
+
+## Getting started
 
 Recommend you clone this repository to enable `update-autoload` subcommand.
 
