@@ -42,6 +42,23 @@ get_my_path() {
   cd -P "$(dirname $src)" && pwd
 }
 
+ancestors() {
+  local dir="$(pwd)"
+
+  while true; do
+    if [[ "$dir" == "$HOME" ]] || [[ "$dir" == "/" ]]; then
+      break
+    fi
+
+    echo "$dir"
+    dir="$(cd $dir && cd ../ && pwd)"
+  done
+
+  if [[ "${USE_GLOBAL_CONFIG:=true}" != "false" ]]; then
+    echo "$HOME/.ngrok2"
+  fi
+}
+
 get_config_opts() {
   local config_dir='' config_path=''
   local locations=()
@@ -74,28 +91,17 @@ exec_ngrok_with_configurations() {
   shift 1
   local options=()
   IFS=" " read -r -a options <<< "$(subcommand::configs-oneline)"
-  exec command ngrok "$subcommand" "${options[@]}" "$@"
+  exec ngrok "$subcommand" "${options[@]}" "$@"
+}
+
+exec_ngrok_with_default() {
+  local -r subcommand="$1"
+  shift 1
+  exec ngrok "$subcommand" "$@"
 }
 
 is_original_subcommand() {
   declare -F "subcommand::$1" >/dev/null 2>&1
-}
-
-ancestors() {
-  local dir="$(pwd)"
-
-  while true; do
-    if [[ "$dir" == "$HOME" ]] || [[ "$dir" == "/" ]]; then
-      break
-    fi
-
-    echo "$dir"
-    dir="$(cd $dir && cd ../ && pwd)"
-  done
-
-  if [[ "${USE_GLOBAL_CONFIG:=true}" != "false" ]]; then
-    echo "$HOME/.ngrok2"
-  fi
 }
 
 subcommand::configs() {
@@ -137,5 +143,5 @@ if is_original_subcommand "$SUBCOMMAND"; then
 elif [[ "${IGNORE_CONFIG:=false}" != "true" ]] && should_load_configs "$SUBCOMMAND"; then
   exec_ngrok_with_configurations "$SUBCOMMAND" "$@"
 else
-  exec command ngrok "$SUBCOMMAND" "$@"
+  exec_ngrok_with_default "$SUBCOMMAND" "$@"
 fi
