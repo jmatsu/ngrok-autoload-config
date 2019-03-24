@@ -32,18 +32,20 @@ reverse() {
 get_my_path() {
   local src="${BASH_SOURCE[0]}" temp_dir=''
   while [[ -h "$src" ]]; do
-    temp_dir="$(cd -P "$(dirname $src)" && pwd)"
+    temp_dir="$(cd -P "$(dirname "$src")" && pwd)"
     src="$(readlink "$src")"
 
     if [[ ! "$src" =~ ^/.* ]]; then
       src="$temp_dir/$src"
     fi
   done
-  cd -P "$(dirname $src)" && pwd
+  cd -P "$(dirname "$src")" && pwd
 }
 
 ancestors() {
-  local dir="$(pwd)"
+  local dir=''
+
+  dir="$(pwd)"
 
   while true; do
     if [[ "$dir" == "$HOME" ]] || [[ "$dir" == "/" ]]; then
@@ -51,7 +53,7 @@ ancestors() {
     fi
 
     echo "$dir"
-    dir="$(cd $dir && cd ../ && pwd)"
+    dir="$(cd "$dir" && cd ../ && pwd)"
   done
 
   if [[ "${USE_GLOBAL_CONFIG:=true}" != "false" ]]; then
@@ -60,12 +62,12 @@ ancestors() {
 }
 
 get_config_opts() {
-  local config_dir='' config_path=''
+  local location='' config_path=''
   local locations=()
-  IFS=" " read -r -a options <<< "$(ancestors | reverse | xargs)"
+  IFS=" " read -r -a locations <<< "$(ancestors | reverse | xargs)"
 
-  for config_dir in "${options[@]}"; do
-    config_path="${config_dir}/ngrok.yml"
+  for location in "${locations[@]}"; do
+    config_path="${location}/ngrok.yml"
 
     if [[ -f "$config_path" ]]; then
       echo "--config $config_path"

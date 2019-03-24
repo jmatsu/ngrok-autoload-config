@@ -10,12 +10,14 @@ You don't need to specify `ngrok` configuration files anymore.
 
 If a working directory is `~/x/project/a/b/c`, then `ngrok-autoload-config` will use existing configurations in the following order.
 
-> ~/.ngrok2/ngrok.yml # a global configuration
-> ~/x/ngrok.yml
-> ~/x/project/ngrok.yml
-> ~/x/project/a/ngrok.yml
-> ~/x/project/a/b/ngrok.yml
-> ~/x/project/a/b/c/ngrok.yml # working directory configuration
+```
+~/.ngrok2/ngrok.yml # a global configuration
+~/x/ngrok.yml
+~/x/project/ngrok.yml
+~/x/project/a/ngrok.yml
+~/x/project/a/b/ngrok.yml
+~/x/project/a/b/c/ngrok.yml # working directory configuration
+```
 
 Lower settings override the upper settings. So the strongest configuration is of the current working directory, and the weakest configuration will be the global configuration.
 
@@ -27,7 +29,8 @@ Recommend you clone this repository to enable `update-autoload` subcommand.
 
 ```
 $ git clone git@github.com:jmatsu/ngrok-autoload-config.git
-$ alias ngrok="$$PWD/ngrok-autoload-config/ngrok-autoload-config" >> ~/.bashrc
+# make sure use double quote
+$ alias ngrok="$PWD/ngrok-autoload-config/ngrok-autoload-config" >> ~/.bashrc
 ```
 
 Otherwise, just download `ngrok-autoload-config` and make an alias.
@@ -60,4 +63,6 @@ $ direnv allow
 2. Add testcases if needed
 3. Please make sure `bin/exec_all_bats.bash` and `shellcheck ngrok-autoload-config` work
 
-NOTE: If you have installed CircleCI CLI, run `circleci local execute --job jmatsu/bats-test` and `circleci local execute --job shellcheck/check`.
+If you have installed CircleCI CLI, you can run `circleci local execute --job jmatsu/bats-test` to execute `bin/exec_all_bats.bash`.
+
+NOTE: `circleci local execute --job shellcheck/check` does not work because `git` is not installed on this image.
