@@ -47,13 +47,16 @@ Update `ngrok-autoload-config` itself through `git`.
 
 ## Development
 
+**Set up**
+
 ```
 $ git submodule init
 $ git submodule update
 $ direnv allow
 ```
 
-**Run tests**
-
 1. Edit `ngrok-autoload-config`
-2. Run `bin/exec_all_bats.bash`
+2. Add testcases if needed
+3. Please make sure `bin/exec_all_bats.bash` and `shellcheck ngrok-autoload-config` work
+
+NOTE: If you have installed CircleCI CLI, run `circleci local execute --job jmatsu/bats-test` and `circleci local execute --job shellcheck/check`.
