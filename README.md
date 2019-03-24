@@ -19,7 +19,7 @@ If a working directory is `~/x/project/a/b/c`, then `ngrok-autoload-config` will
 ~/x/project/a/b/c/ngrok.yml # working directory configuration
 ```
 
-Lower settings override the upper settings. So the strongest configuration is of the current working directory, and the weakest configuration will be the global configuration.
+Lower settings override the upper settings. So the strongest configuration is of the current working directory, and the weakest configuration will be the global configuration. This behavior relies on `ngrok`.
 
 NOTE: `ngrok-autoload-config` won't load `~/ngrok.yml` because it's the same to a global configuration.
 
