@@ -43,10 +43,6 @@ Otherwise, just download `ngrok-autoload-config` and make an alias.
 
 `ngrok-autoload-config configs` can show configurations to be loaded from the current working directory.
 
-**configs-oneline**
-
-Just make output of `configs` a single line.
-
 **update-autoload**
 
 This will update `ngrok-autoload-config` itself through `git`.

@@ -3,9 +3,9 @@ export WORKING_DIRECTORY="$WORKING_DIRECTORY_ROOT/a/b/c/d"
 export HOME="$WORKING_DIRECTORY_ROOT/home"
 
 setup() {
-  mkdir -p "$WORKING_DIRECTORY" "$HOME/.ngrok2"
+  mkdir -p "$WORKING_DIRECTORY" "$HOME/.ngrok2" "$HOME/.config/ngrok"
 
-  touch "$WORKING_DIRECTORY_ROOT/a/ngrok.yml" "$WORKING_DIRECTORY_ROOT/a/b/c/d/ngrok.yml" "$HOME/.ngrok2/ngrok.yml"
+  touch "$WORKING_DIRECTORY_ROOT/a/ngrok.yml" "$WORKING_DIRECTORY_ROOT/a/b/c/d/ngrok.yml" "$HOME/.ngrok2/ngrok.yml" "$HOME/.config/ngrok/ngrok.yml"
 
   cd "$WORKING_DIRECTORY"
 }
