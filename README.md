@@ -30,7 +30,7 @@ See [ngrok#config](https://ngrok.com/docs#config) to define configurations.
 Recommend you clone this repository to enable `update-autoload` subcommand.
 
 ```
-$ git clone git@github.com:jmatsu/ngrok-autoload-config.git
+$ git clone -b release git@github.com:jmatsu/ngrok-autoload-config.git
 # make sure use double quote
 $ alias ngrok="$PWD/ngrok-autoload-config/ngrok-autoload-config" >> ~/.bashrc
 ```
@@ -42,10 +42,6 @@ Otherwise, just download `ngrok-autoload-config` and make an alias.
 **configs**
 
 `ngrok-autoload-config configs` can show configurations to be loaded from the current working directory.
-
-**configs-oneline**
-
-Just make output of `configs` a single line.
 
 **update-autoload**
 

@@ -7,6 +7,18 @@ if [[ "${NGROK_AUTOLOAD_CONFIG_DEBUG:-false}" == "true" ]]; then
   set -x
 fi
 
+temp_dir="$(mktemp -d)"
+
+cleanup() {
+  if [[ -d "$temp_dir" ]]; then
+    rm -fr "$temp_dir"
+  fi
+}
+
+trap cleanup EXIT HUP INT QUIT TERM USR1 USR2
+
+_NGROK_CONFIG_OPTIONS=()
+
 err() {
   echo "$*" >&2
 }
@@ -29,6 +41,10 @@ reverse() {
   fi
 }
 
+ngrok::config_version() {
+  command ngrok --version | awk '$0=$3' | awk -F. '$0=$1'
+}
+
 get_my_path() {
   local src="${BASH_SOURCE[0]}" temp_dir=''
   while [[ -h "$src" ]]; do
@@ -40,6 +56,24 @@ get_my_path() {
     fi
   done
   cd -P "$(dirname "$src")" && pwd
+}
+
+global_config_dir() {
+  if [[ "$(ngrok::config_version)" == "3" ]]; then
+    case "$(uname -s | tr '[:upper:]' '[:lower:]')" in
+      darwin)
+        echo "$HOME/Library/Application Support/ngrok"
+        ;;
+      linux*)
+        echo "$HOME/.config/ngrok"
+        ;;
+      *)
+        die "$(uname -a) is not supported"
+        ;;
+    esac
+  else
+    echo "$HOME/.ngrok2"
+  fi
 }
 
 ancestors() {
@@ -57,22 +91,22 @@ ancestors() {
   done
 
   if [[ "${USE_GLOBAL_CONFIG:=true}" != "false" ]]; then
-    echo "$HOME/.ngrok2"
+    global_config_dir
   fi
 }
 
-get_config_opts() {
+build_config_options() {
   local location='' config_path=''
-  local locations=()
-  IFS=" " read -r -a locations <<< "$(ancestors | reverse | xargs)"
 
-  for location in "${locations[@]}"; do
+  ancestors | reverse > "$temp_dir/config_dir.txt"
+
+  while read -r location; do
     config_path="${location}/ngrok.yml"
 
     if [[ -f "$config_path" ]]; then
-      echo "--config $config_path"
+      _NGROK_CONFIG_OPTIONS+=(--config "$config_path")
     fi
-  done
+  done < "$temp_dir/config_dir.txt"
 }
 
 should_load_configs() {
@@ -91,9 +125,14 @@ should_load_configs() {
 exec_ngrok_with_configurations() {
   local -r subcommand="$1"
   shift 1
-  local options=()
-  IFS=" " read -r -a options <<< "$(subcommand::configs-oneline)"
-  exec ngrok "$subcommand" "${options[@]}" "$@"
+
+  build_config_options
+
+  if (("${#_NGROK_CONFIG_OPTIONS[*]} > 0")); then
+    exec ngrok "$subcommand" "${_NGROK_CONFIG_OPTIONS[@]}" "$@"
+  else
+    exec ngrok "$subcommand" "$@"
+  fi
 }
 
 exec_ngrok_with_default() {
@@ -107,11 +146,14 @@ is_original_subcommand() {
 }
 
 subcommand::configs() {
-  get_config_opts
-}
+  build_config_options
 
-subcommand::configs-oneline() {
-  subcommand::configs | xargs
+  local idx=1
+
+  while (("${#_NGROK_CONFIG_OPTIONS[*]} > $idx")); do
+    echo "--config ${_NGROK_CONFIG_OPTIONS[$idx]}"
+    ((idx = idx + 2))
+  done
 }
 
 subcommand::update-autoload() {
@@ -142,8 +184,14 @@ fi
 
 if is_original_subcommand "$SUBCOMMAND"; then
   "subcommand::$SUBCOMMAND" "$@"
-elif [[ "${IGNORE_CONFIG:=false}" != "true" ]] && should_load_configs "$SUBCOMMAND"; then
-  exec_ngrok_with_configurations "$SUBCOMMAND" "$@"
 else
-  exec_ngrok_with_default "$SUBCOMMAND" "$@"
+  if [[ "${IGNORE_CONFIG:=false}" != "true" ]] && should_load_configs "$SUBCOMMAND"; then
+    build_config_options
+  fi
+
+  if (("${#_NGROK_CONFIG_OPTIONS[*]} > 0")); then
+    exec ngrok "$SUBCOMMAND" "${_NGROK_CONFIG_OPTIONS[@]}" "$@"
+  else
+    exec ngrok "$SUBCOMMAND" "$@"
+  fi
 fi

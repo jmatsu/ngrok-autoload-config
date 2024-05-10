@@ -3,6 +3,10 @@
 set -eu
 set -o pipefail
 
+if [[ "${1-}" == "--version" ]]; then
+  exec echo "ngrok version ${NGROK_VERSION-3.8.0}"
+fi
+
 for c in "$@"; do
   echo "$c"
 done
