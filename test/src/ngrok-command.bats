@@ -69,8 +69,22 @@ source "src/hooks"
     assert_line --index 2 -- "demo"
 }
 
-@test "Should inject configs between the subcommand and the options for others" {
-    run ngrok-autoload-config http 8000 demo
+@test "Should inject configs between the subcommand and the options for others [v3]" {
+    NGROK_VERSION=3.8.0 run ngrok-autoload-config http 8000 demo
+    assert_success
+    assert_line --index 0 -- "http"
+    assert_line --index 1 -- "--config"
+    assert_line --index 2 -- "$HOME/.config/ngrok/ngrok.yml"
+    assert_line --index 3 -- "--config"
+    assert_line --index 4 -- "$WORKING_DIRECTORY_ROOT/a/ngrok.yml"
+    assert_line --index 5 -- "--config"
+    assert_line --index 6 -- "$WORKING_DIRECTORY_ROOT/a/b/c/d/ngrok.yml"
+    assert_line --index 7 -- "8000"
+    assert_line --index 8 -- "demo"
+}
+
+@test "Should inject configs between the subcommand and the options for others [v2]" {
+    NGROK_VERSION=2.2.0 run ngrok-autoload-config http 8000 demo
     assert_success
     assert_line --index 0 -- "http"
     assert_line --index 1 -- "--config"
