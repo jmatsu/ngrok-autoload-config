@@ -147,7 +147,13 @@ is_original_subcommand() {
 
 subcommand::configs() {
   build_config_options
-  echo "${_NGROK_CONFIG_OPTIONS[@]}"
+
+  local idx=1
+
+  while (("${#_NGROK_CONFIG_OPTIONS[*]} > $idx")); do
+    echo "--config ${_NGROK_CONFIG_OPTIONS[$idx]}"
+    ((idx = idx + 2))
+  done
 }
 
 subcommand::update-autoload() {
